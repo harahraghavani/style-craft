@@ -11,6 +11,7 @@ import {
 } from "@core/utils/serverHelpers";
 import { FirebaseProvider } from "@/context/Firebase/FirebaseContext";
 import { Toaster } from "react-hot-toast";
+import { ConstantProvider } from "@/context/constant/ConstantContext";
 
 const Providers = (props) => {
   // Props
@@ -23,14 +24,16 @@ const Providers = (props) => {
 
   return (
     <FirebaseProvider>
-      <VerticalNavProvider>
-        <SettingsProvider settingsCookie={settingsCookie} mode={mode}>
-          <ThemeProvider direction={direction} systemMode={systemMode}>
-            {children}
-          </ThemeProvider>
-          <Toaster />
-        </SettingsProvider>
-      </VerticalNavProvider>
+      <ConstantProvider>
+        <VerticalNavProvider>
+          <SettingsProvider settingsCookie={settingsCookie} mode={mode}>
+            <ThemeProvider direction={direction} systemMode={systemMode}>
+              {children}
+            </ThemeProvider>
+            <Toaster />
+          </SettingsProvider>
+        </VerticalNavProvider>
+      </ConstantProvider>
     </FirebaseProvider>
   );
 };
