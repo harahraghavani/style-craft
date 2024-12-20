@@ -23,8 +23,8 @@ const Providers = (props) => {
   const systemMode = getSystemMode();
 
   return (
-    <FirebaseProvider>
-      <ConstantProvider>
+    <ConstantProvider>
+      <FirebaseProvider>
         <VerticalNavProvider>
           <SettingsProvider settingsCookie={settingsCookie} mode={mode}>
             <ThemeProvider direction={direction} systemMode={systemMode}>
@@ -33,8 +33,8 @@ const Providers = (props) => {
             <Toaster />
           </SettingsProvider>
         </VerticalNavProvider>
-      </ConstantProvider>
-    </FirebaseProvider>
+      </FirebaseProvider>
+    </ConstantProvider>
   );
 };
 

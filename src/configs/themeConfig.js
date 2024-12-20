@@ -17,7 +17,7 @@
  */
 const themeConfig = {
   templateName: "Style Craft",
-  homePageUrl: "/",
+  homePageUrl: "/login",
   settingsCookieName: "style-craft-theme-config",
   mode: "system", // 'system', 'light', 'dark'
   skin: "default", // 'default', 'bordered'

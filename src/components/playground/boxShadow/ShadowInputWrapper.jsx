@@ -1,104 +1,110 @@
 "use client";
-
-import React from "react";
+import { useCallback } from "react";
 import { useConstantValues } from "@/hooks/Constant/useConstantValues";
 import FormInput from "@/components/form/FormInput";
-import { useForm } from "react-hook-form";
-import { Box, Typography } from "@mui/material";
+import { useFormContext } from "react-hook-form";
+import { Box, Card, Typography } from "@mui/material";
+import FormColorPicker from "@/components/form/FormColorPicker";
+import FormCheckBox from "@/components/form/FormCheckBox";
 
 const ShadowInputWrapper = () => {
+  const { boxShadow, updateBoxShadow } = useConstantValues();
+
   // Form hook setup
   const {
     control,
-    handleSubmit,
-    reset,
-    formState: { errors, isDirty },
-  } = useForm({
-    mode: "all",
-  });
+    formState: { errors },
+  } = useFormContext();
 
-  const { boxShadow, updateBoxShadow } = useConstantValues();
+  const inputs = [
+    { label: "X", name: "horizontalOffset", suffix: "Horizontal Offset" },
+    { label: "Y", name: "verticalOffset", suffix: "Vertical Offset" },
+    { label: "B", name: "blur", suffix: "Blur" },
+    { label: "S", name: "spread", suffix: "Spread" },
+  ];
+
+  const handleNumberInputChange = useCallback(
+    (field, value) => {
+      updateBoxShadow({ [field]: value });
+    },
+    [updateBoxShadow]
+  );
+
+  const handleColorChange = useCallback(
+    (color) => {
+      updateBoxShadow({
+        color: color.hex,
+      });
+    },
+    [updateBoxShadow]
+  );
 
   return (
-    <Box>
-      <Box display="flex" flexDirection="column" gap={4}>
-        {/* HORIZONAL OFFSET */}
-        <Box display="flex" gap={4} alignItems="center">
-          <Typography>X</Typography>
-          <Box>
-            <FormInput
-              name="horizonalOffset"
-              errors={errors?.horizonalOffset}
-              control={control}
-              type="number"
-              fullWidth={true}
-              onChangeCallback={(e) => {
-                const value = e?.target?.value;
-                updateBoxShadow({ horizonalOffset: Number(value) });
-              }}
-            />
+    <Box display="flex" justifyContent="flex-start">
+      <Card
+        sx={{
+          padding: 6,
+          boxShadow: "none",
+          borderRadius: 2,
+          border: "1px solid #d9d9d9",
+          bgcolor: "transparent",
+          position: "relative",
+          overflow: "visible",
+        }}
+      >
+        <Box display="flex" flexDirection="column" gap={4}>
+          {inputs.map((input) => (
+            <Box key={input.name} display="flex" gap={4} alignItems="center">
+              <Typography>{input.label}</Typography>
+              <Box>
+                <FormInput
+                  name={input.name}
+                  errors={errors[input.name]}
+                  control={control}
+                  type="number"
+                  fullWidth={true}
+                  onChangeCallback={(e) =>
+                    handleNumberInputChange(input.name, Number(e.target.value))
+                  }
+                />
+              </Box>
+              <Typography flex={1}>
+                {`${boxShadow[input.name]}px ${input.suffix}`}
+              </Typography>
+            </Box>
+          ))}
+          {/* COLOR */}
+          <Box display="flex" gap={4} alignItems="center">
+            <Typography>C</Typography>
+            <Box>
+              <FormColorPicker
+                control={control}
+                name="color"
+                value={boxShadow.color}
+                onChangeCallback={handleColorChange}
+              />
+            </Box>
+            <Typography flex={1} textTransform={"uppercase"}>
+              {boxShadow.color}
+            </Typography>
           </Box>
-          <Typography
-            flex={1}
-          >{`${boxShadow.horizonalOffset}px Horizontal Offset`}</Typography>
-        </Box>
-        {/* VERTICAL OFFSET */}
-        <Box display="flex" gap={4} alignItems="center">
-          <Typography>Y</Typography>
+          {/* INSET */}
           <Box>
-            <FormInput
-              name="verticalOffset"
-              errors={errors?.verticalOffset}
-              control={control}
-              type="number"
-              fullWidth={true}
-              onChangeCallback={(e) => {
-                const value = e?.target?.value;
-                updateBoxShadow({ verticalOffset: Number(value) });
-              }}
-            />
+            <Box>
+              <FormCheckBox
+                name="inset"
+                control={control}
+                value={boxShadow.inset}
+                error={errors.inset}
+                label="Inset"
+                onChangeCallback={(value) => {
+                  handleNumberInputChange("inset", value);
+                }}
+              />
+            </Box>
           </Box>
-          <Typography
-            flex={1}
-          >{`${boxShadow.verticalOffset}px Vertical Offset`}</Typography>
         </Box>
-        {/* BLUR */}
-        <Box display="flex" gap={4} alignItems="center">
-          <Typography>B</Typography>
-          <Box>
-            <FormInput
-              name="blur"
-              errors={errors?.blur}
-              control={control}
-              type="number"
-              fullWidth={true}
-              onChangeCallback={(e) => {
-                const value = e?.target?.value;
-                updateBoxShadow({ blur: Number(value) });
-              }}
-            />
-          </Box>
-          <Typography flex={1}>{`${boxShadow.blur}px Blur`}</Typography>
-        </Box>
-        {/* SPREAD */}
-        <Box display="flex" gap={4} alignItems="center">
-          <Typography>S</Typography>
-          <Box>
-            <FormInput
-              name="spread"
-              errors={errors?.spread}
-              control={control}
-              type="number"
-              fullWidth={true}
-              onChangeCallback={(e) => {
-                const value = e?.target?.value;
-                updateBoxShadow({ spread: Number(value) });
-              }}
-            />
-          </Box>
-          <Typography flex={1}>{`${boxShadow.spread}px Spread`}</Typography>
-        </Box>
-      </Box>
+      </Card>
     </Box>
   );
 };

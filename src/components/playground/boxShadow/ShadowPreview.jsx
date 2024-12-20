@@ -6,13 +6,15 @@ import { Box } from "@mui/material";
 
 const ShadowPreview = () => {
   const { getBoxShadowString } = useConstantValues();
+
   return (
     <Box display="flex" justifyContent="center">
       <Box
         boxShadow={getBoxShadowString()}
         height={350}
-        width={350}
+        width={400}
         borderRadius={2}
+        border={"1px solid #d9d9d9"}
       >
         <Box
           display="flex"

@@ -20,6 +20,18 @@ const verticalMenuData = (dictionary = {}) => {
         },
       ],
     },
+    {
+      id: "your-feed",
+      label: "Your Feed",
+      icon: "tabler-user",
+      children: [
+        {
+          label: nav.boxShadow || "Box Shadow",
+          icon: "tabler-point",
+          href: "/your-feed/box-shadow",
+        },
+      ],
+    },
   ];
 };
 

@@ -1,5 +1,4 @@
 "use client";
-
 import {
   GoogleAuthProvider,
   getAuth,
@@ -7,7 +6,14 @@ import {
   signInWithPopup,
   signOut,
 } from "firebase/auth";
-import { doc, getDoc, getFirestore, setDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getFirestore,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import MY_APP from "@/configs/Firebase/firebaseConfig";
 import { useRouter } from "next/navigation";
 import { createContext, useEffect, useState } from "react";
@@ -34,6 +40,9 @@ const FirebaseProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [loader, setLoader] = useState(false);
   const [user, setUser] = useState(null);
+  const [isShadowStoring, setIsShadowStoring] = useState(false);
+  const [userBoxShadowData, setUserBoxShadowData] = useState([]);
+  const [isFetchingList, setIsFetchingList] = useState(false);
 
   // COOKIE DATA
   const accessToken = getCookie(USER_ACCESS_TOKEN);
@@ -106,6 +115,80 @@ const FirebaseProvider = ({ children }) => {
     setLoader(false);
   };
 
+  const storeBoxShadowInCollection = async ({ boxShadow, isPublic, id }) => {
+    setIsShadowStoring(true);
+
+    try {
+      const boxShadowCollectionRef = collection(
+        DATABASE,
+        COLLECTION_NAMES.BOX_SHADOW
+      );
+      const boxShadowDocRef = doc(boxShadowCollectionRef, "boxShadowArray");
+      const boxShadowSnapshot = await getDoc(boxShadowDocRef);
+
+      const newBoxShadowData = {
+        id,
+        userId: user?.uid ?? auth?.currentUser?.uid,
+        boxShadow,
+        isPublic,
+        createdAt: new Date().valueOf(),
+      };
+
+      if (boxShadowSnapshot.exists()) {
+        // Get existing data
+        const existingData = boxShadowSnapshot.data().boxShadowArray || [];
+
+        // Check if the item exists in the array
+        const index = existingData.findIndex((item) => item.id === id);
+
+        if (index !== -1) {
+          // Update the existing entry
+          existingData[index] = { ...existingData[index], ...newBoxShadowData };
+        } else {
+          // Add a new entry
+          existingData.push(newBoxShadowData);
+        }
+
+        // Update the document with the modified array
+        await updateDoc(boxShadowDocRef, { boxShadowArray: existingData });
+      } else {
+        // If no document exists, create a new one with the array
+        await setDoc(boxShadowDocRef, { boxShadowArray: [newBoxShadowData] });
+      }
+
+      setIsShadowStoring(false);
+    } catch (error) {
+      setIsShadowStoring(false);
+    }
+  };
+
+  const getBoxShadowData = async () => {
+    setIsFetchingList(true);
+    try {
+      const boxShadowCollectionRef = collection(
+        DATABASE,
+        COLLECTION_NAMES.BOX_SHADOW
+      );
+      const boxShadowDocRef = doc(boxShadowCollectionRef, "boxShadowArray");
+
+      const boxShadowSnapshot = await getDoc(boxShadowDocRef);
+
+      if (boxShadowSnapshot.exists()) {
+        const boxShadowArray = boxShadowSnapshot.data().boxShadowArray || [];
+
+        // Filter the array for the current logged-in user
+        const currentUser = user?.uid ?? auth?.currentUser?.uid;
+        const userBoxShadows = boxShadowArray.filter(
+          (item) => item.userId === currentUser
+        );
+        setUserBoxShadowData(userBoxShadows);
+      }
+      setIsFetchingList(false);
+    } catch (error) {
+      setIsFetchingList(false);
+    }
+  };
+
   useEffect(() => {
     isUserExist();
     // eslint-disable-next-line
@@ -115,12 +198,17 @@ const FirebaseProvider = ({ children }) => {
     firebaseMethods: {
       signUpWithGoogle,
       logoutUser,
+      storeBoxShadowInCollection,
+      getBoxShadowData,
     },
     states: {
       isLoading,
       user,
       loader,
       accessToken,
+      isShadowStoring,
+      isFetchingList,
+      userBoxShadowData,
     },
   };
 

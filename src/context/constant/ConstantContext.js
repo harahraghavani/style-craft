@@ -14,10 +14,10 @@ const ConstantContext = createContext(defaultProviders);
 const ConstantProvider = ({ children }) => {
   const [shadow, setShadow] = useState(defaultProviders.boxShadow);
 
-  const getBoxShadowString = () => {
-    const { horizonalOffset, verticalOffset, blur, spread, color, inset } =
-      shadow;
-    return `${inset ? "inset" : ""} ${horizonalOffset}px ${verticalOffset}px ${blur}px ${spread}px ${color}`;
+  const getBoxShadowString = (shadowObject) => {
+    const { horizontalOffset, verticalOffset, blur, spread, color, inset } =
+      shadowObject ?? shadow;
+    return `${inset ? "inset" : ""} ${horizontalOffset}px ${verticalOffset}px ${blur}px ${spread}px ${color}`;
   };
 
   const updateBoxShadow = (value) => {
