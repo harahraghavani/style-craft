@@ -13,7 +13,8 @@ const ShadowInputWrapper = () => {
   // Form hook setup
   const {
     control,
-    formState: { errors },
+    setValue,
+    formState: { errors, isDirty },
   } = useFormContext();
 
   const inputs = [
@@ -26,6 +27,7 @@ const ShadowInputWrapper = () => {
   const handleNumberInputChange = useCallback(
     (field, value) => {
       updateBoxShadow({ [field]: value });
+      setValue(field, value, { shouldDirty: true });
     },
     [updateBoxShadow]
   );
@@ -81,7 +83,9 @@ const ShadowInputWrapper = () => {
                 control={control}
                 name="color"
                 value={boxShadow.color}
-                onChangeCallback={handleColorChange}
+                onChangeCallback={(value) => {
+                  handleNumberInputChange("color", value?.hex);
+                }}
               />
             </Box>
             <Typography flex={1} textTransform={"uppercase"}>

@@ -1,5 +1,6 @@
 import CryptoJS from "crypto-js";
 import { destroyCookie, parseCookies, setCookie } from "nookies";
+import toast from "react-hot-toast";
 
 export const encryptData = (data) => {
   const encryptedData = CryptoJS.AES.encrypt(
@@ -52,8 +53,9 @@ export const truncateText = (text, maxLength = 100) => {
     return "Generated Image";
   }
 };
-export const copyToClipboard = (text) => {
+export const copyToClipboard = (text, succMsg = "Copied to clipboard") => {
   if (text) {
     navigator.clipboard.writeText(text).then(() => {});
+    toast.success(succMsg);
   }
 };

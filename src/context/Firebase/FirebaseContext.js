@@ -15,21 +15,26 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import MY_APP from "@/configs/Firebase/firebaseConfig";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { createContext, useEffect, useState } from "react";
 import {
   COLLECTION_NAMES,
+  INITIAL_BOX_SHADOW,
   USER_ACCESS_TOKEN,
   USER_DATA,
 } from "@/constant/appConstant";
 import { clearCookie, createCookie, getCookie } from "@/utils/utils";
 import toast from "react-hot-toast";
+import { useConstantValues } from "@/hooks/Constant/useConstantValues";
 
 const FirebaseContext = createContext();
 
 const FirebaseProvider = ({ children }) => {
   // REACT ROUTER
   const router = useRouter();
+  const pathname = usePathname();
+
+  const { updateBoxShadow } = useConstantValues();
 
   // FIREBASE
   const auth = getAuth(MY_APP);
@@ -43,6 +48,8 @@ const FirebaseProvider = ({ children }) => {
   const [isShadowStoring, setIsShadowStoring] = useState(false);
   const [userBoxShadowData, setUserBoxShadowData] = useState([]);
   const [isFetchingList, setIsFetchingList] = useState(false);
+  const [isShadowDetails, setIsShadowDetails] = useState(true);
+  const [shadowDetails, setShadowDetails] = useState(null);
 
   // COOKIE DATA
   const accessToken = getCookie(USER_ACCESS_TOKEN);
@@ -189,6 +196,38 @@ const FirebaseProvider = ({ children }) => {
     }
   };
 
+  const getShadowById = async (id) => {
+    setIsShadowDetails(true);
+    try {
+      const boxShadowCollectionRef = collection(
+        DATABASE,
+        COLLECTION_NAMES.BOX_SHADOW
+      );
+      const boxShadowDocRef = doc(boxShadowCollectionRef, "boxShadowArray");
+      const boxShadowSnapshot = await getDoc(boxShadowDocRef);
+
+      if (boxShadowSnapshot.exists()) {
+        const boxShadowArray = boxShadowSnapshot.data().boxShadowArray || [];
+        const shadowDetails = boxShadowArray.find((item) => item.id === id);
+        if (shadowDetails) {
+          setShadowDetails(shadowDetails);
+          updateBoxShadow(shadowDetails.boxShadow);
+        } else {
+          setShadowDetails(null);
+        }
+      } else {
+        setShadowDetails(null);
+      }
+      setIsShadowDetails(false);
+    } catch (error) {
+      setIsShadowDetails(false);
+    }
+  };
+
+  useEffect(() => {
+    updateBoxShadow(INITIAL_BOX_SHADOW);
+  }, [pathname]);
+
   useEffect(() => {
     isUserExist();
     // eslint-disable-next-line
@@ -200,6 +239,7 @@ const FirebaseProvider = ({ children }) => {
       logoutUser,
       storeBoxShadowInCollection,
       getBoxShadowData,
+      getShadowById,
     },
     states: {
       isLoading,
@@ -209,6 +249,8 @@ const FirebaseProvider = ({ children }) => {
       isShadowStoring,
       isFetchingList,
       userBoxShadowData,
+      isShadowDetails,
+      shadowDetails,
     },
   };
 
