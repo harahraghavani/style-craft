@@ -143,7 +143,7 @@ const UserDropdown = () => {
                       size="small"
                       endIcon={<i className="tabler-logout" />}
                       onClick={async () => {
-                        await logoutUser();
+                        await logoutUser({});
                       }}
                       sx={{
                         "& .MuiButton-endIcon": { marginInlineStart: 1.5 },

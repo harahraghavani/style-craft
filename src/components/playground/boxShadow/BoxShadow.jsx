@@ -111,7 +111,7 @@ const BoxShadow = () => {
               </Button>
               <Button
                 variant="contained"
-                disabled={isShadowStoring || btnDisable}
+                disabled={isShadowStoring || (shadowId ? false : btnDisable)}
                 onClick={() => {
                   handleSave({
                     isPublic: shadowId

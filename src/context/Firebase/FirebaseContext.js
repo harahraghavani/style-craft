@@ -91,14 +91,16 @@ const FirebaseProvider = ({ children }) => {
       });
   };
 
-  const logoutUser = async () => {
+  const logoutUser = async ({ showToast = true }) => {
     await signOut(auth)
       .then(() => {
         setUser(null);
         clearCookie(USER_ACCESS_TOKEN);
         clearCookie(USER_DATA);
         router.push("/login");
-        toast.success("Logged out successfully");
+        if (showToast) {
+          toast.success("Logged out successfully");
+        }
       })
       .catch((error) => {
         toast.error(error.message);
@@ -106,6 +108,12 @@ const FirebaseProvider = ({ children }) => {
       .finally(() => {});
     clearCookie(USER_ACCESS_TOKEN);
     clearCookie(USER_DATA);
+  };
+
+  const removeUser = async () => {
+    try {
+      await logoutUser({ showToast: false });
+    } catch (error) {}
   };
 
   const isUserExist = () => {
@@ -232,6 +240,13 @@ const FirebaseProvider = ({ children }) => {
     isUserExist();
     // eslint-disable-next-line
   }, []);
+
+  useEffect(() => {
+    if (user && !accessToken) {
+      removeUser();
+    }
+    // eslint-disable-next-line
+  }, [user, accessToken]);
 
   const values = {
     firebaseMethods: {
